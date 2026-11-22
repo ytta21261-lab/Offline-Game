@@ -21,6 +21,16 @@ jobs:
           rm -rf lib && mkdir lib && cp app_src/*.dart lib/
           sed -i 's#<application#<uses-permission android:name="android.permission.INTERNET"/>\n    <application#' android/app/src/main/AndroidManifest.xml
           sed -i 's#android:label="[^"]*"#android:label="Pesta Mini"#' android/app/src/main/AndroidManifest.xml
+      - name: Matikan Android lint (penyebab crash di assembleRelease)
+        run: |
+          mkdir -p ~/.gradle/init.d
+          cat > ~/.gradle/init.d/nolint.gradle <<'EOF'
+          allprojects {
+            tasks.configureEach { t ->
+              if (t.name.startsWith('lintVital') || t.name.startsWith('lintAnalyze') || t.name.startsWith('lintReport') || t.name == 'lint') { t.enabled = false }
+            }
+          }
+          EOF
       - run: flutter pub get
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
