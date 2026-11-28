@@ -24,7 +24,7 @@ class _MemoryS extends State<MemoryGame> {
     if (a == null) { a = i; return; }
     final b = a!; a = null; moves++;
     if (d[b] == d[i]) {
-      HapticFeedback.lightImpact();
+      Sfx.good();
       setState(() { ok[b] = true; ok[i] = true; });
     } else {
       lock = true;
@@ -42,8 +42,8 @@ class _MemoryS extends State<MemoryGame> {
               alignment: Alignment.center,
               transform: Matrix4.identity()..setEntry(3, 2, 0.002)..rotateY(v),
               child: v > pi / 2
-                  ? Transform(alignment: Alignment.center, transform: Matrix4.rotationY(pi), child: cart(ok[i] ? const Color(0xFFC9F2C7) : Colors.white, child: Text(d[i], style: const TextStyle(fontSize: 34))))
-                  : cart(pink, child: Text('?', style: ts(32, Colors.white))))));
+                  ? Transform(alignment: Alignment.center, transform: Matrix4.rotationY(pi), child: cart(ok[i] ? const Color(0xFFC9F2C7) : Colors.white, child: Tx(d[i], style: const TextStyle(fontSize: 34))))
+                  : cart(pink, child: Tx('?', style: ts(32, Colors.white))))));
   @override Widget build(BuildContext c) => page([
         status(ok.every((x) => x) ? '🎉 Selesai dalam $moves langkah!' : 'Langkah: $moves'),
         const SizedBox(height: 12),
@@ -84,7 +84,7 @@ class _G2048S extends State<G2048> {
       while (o.length < 4) { o.add(0); }
       for (int j = 0; j < 4; j++) { if (g[L[j]] != o[j]) ch = true; g[L[j]] = o[j]; }
     }
-    if (ch) { _add(); HapticFeedback.selectionClick(); }
+    if (ch) { _add(); Sfx.tap(); }
     setState(() => over = _stuck());
   }
   @override Widget build(BuildContext c) => GestureDetector(
@@ -101,7 +101,7 @@ class _G2048S extends State<G2048> {
             duration: const Duration(milliseconds: 150), alignment: Alignment.center,
             decoration: BoxDecoration(color: _c(v), borderRadius: BorderRadius.circular(14), border: Border.all(color: ink, width: 3)),
             child: AnimatedSwitcher(duration: const Duration(milliseconds: 150), transitionBuilder: (w, a) => ScaleTransition(scale: a, child: w),
-                child: Text(v == 0 ? '' : '$v', key: ValueKey(v), style: ts(v > 99 ? 22 : 28))))]),
+                child: Tx(v == 0 ? '' : '$v', key: ValueKey(v), style: ts(v > 99 ? 22 : 28))))]),
       ]));
 }
 
@@ -122,8 +122,8 @@ class _WhackS extends State<WhackGame> {
         status(t > 0 ? '⏱ $t    ⭐ $s' : 'Selesai! Skor $s 🎉'),
         const SizedBox(height: 12),
         board(3, [for (int i = 0; i < 9; i++) GestureDetector(
-            onTapDown: (_) { if (i == h && t > 0) { HapticFeedback.lightImpact(); setState(() { s++; h = -1; }); } },
-            child: cart(const Color(0xFF9C6B4E), r: 100, child: AnimatedScale(scale: h == i ? 1 : 0, duration: const Duration(milliseconds: 250), curve: Curves.elasticOut, child: const Text('🐹', style: TextStyle(fontSize: 44)))))]),
+            onTapDown: (_) { if (i == h && t > 0) { Sfx.good(); setState(() { s++; h = -1; }); } },
+            child: cart(const Color(0xFF9C6B4E), r: 100, child: AnimatedScale(scale: h == i ? 1 : 0, duration: const Duration(milliseconds: 250), curve: Curves.elasticOut, child: Tx('🐹', style: TextStyle(fontSize: 44)))))]),
       ]);
 }
 
@@ -151,7 +151,7 @@ class _SimonS extends State<SimonGame> {
   }
   Future<void> _tap(int i) async {
     if (!ok) return;
-    HapticFeedback.selectionClick();
+    Sfx.tap();
     setState(() => lit = i);
     Future.delayed(const Duration(milliseconds: 180), () { if (mounted) setState(() => lit = -1); });
     if (q[p] != i) { setState(() { ok = false; msg = 'Salah! Skor ${q.length - 1} 😵'; }); return; }
@@ -191,17 +191,17 @@ class _MathS extends State<MathGame> {
     o = x.toList()..shuffle();
   }
   @override Widget build(BuildContext c) {
-    if (t <= 0) return page([Text('Selesai! 🎉', style: ts(34)), const SizedBox(height: 8), Text('Skor $s', style: ts(28))]);
+    if (t <= 0) return page([Tx('Selesai! 🎉', style: ts(34)), const SizedBox(height: 8), Tx('Skor $s', style: ts(28))]);
     return page([
       status('⏱ $t    ⭐ $s'), const SizedBox(height: 10),
       ClipRRect(borderRadius: BorderRadius.circular(10), child: LinearProgressIndicator(value: t / 30, minHeight: 12, color: pink, backgroundColor: Colors.white)),
       const SizedBox(height: 16),
       AnimatedSwitcher(duration: const Duration(milliseconds: 250), transitionBuilder: (w, an) => ScaleTransition(scale: an, child: w),
-          child: Text('$a ${m ? '×' : '+'} $b', key: ValueKey('$a-$b-$m-$s'), style: ts(54))),
+          child: Tx('$a ${m ? '×' : '+'} $b', key: ValueKey('$a-$b-$m-$s'), style: ts(54))),
       const SizedBox(height: 16),
       for (final v in o) Padding(padding: const EdgeInsets.only(bottom: 12), child: Pressable(
-          onTap: () { setState(() { if (v == ans) { s++; HapticFeedback.lightImpact(); } _nx(); }); },
-          child: cart(Colors.white, w: double.infinity, h: 62, child: Text('$v', style: ts(30))))),
+          onTap: () { setState(() { if (v == ans) { s++; Sfx.good(); } _nx(); }); },
+          child: cart(Colors.white, w: double.infinity, h: 62, child: Tx('$v', style: ts(30))))),
     ]);
   }
 }
@@ -219,10 +219,10 @@ class _SnakeS extends State<SnakeGame> {
   void _tick() {
     if (dead) return;
     final h = s.first + d;
-    if (h.x < 0 || h.y < 0 || h.x > 14 || h.y > 14 || s.contains(h)) { HapticFeedback.heavyImpact(); setState(() => dead = true); return; }
+    if (h.x < 0 || h.y < 0 || h.x > 14 || h.y > 14 || s.contains(h)) { Sfx.bad(); setState(() => dead = true); return; }
     setState(() {
       s.insert(0, h);
-      if (h == f) { sc++; f = Point(rnd.nextInt(15), rnd.nextInt(15)); HapticFeedback.selectionClick(); } else { s.removeLast(); }
+      if (h == f) { sc++; f = Point(rnd.nextInt(15), rnd.nextInt(15)); Sfx.tap(); } else { s.removeLast(); }
     });
   }
   void _dir(int x, int y) { if (x != -d.x || y != -d.y) d = Point(x, y); }
@@ -290,10 +290,10 @@ class _LightsS extends State<LightsGame> {
         status(g.contains(true) ? 'Matikan semua lampu! Langkah $mv' : '🎉 Menang dalam $mv langkah!'),
         const SizedBox(height: 12),
         board(5, [for (int i = 0; i < 25; i++) GestureDetector(
-            onTap: () { HapticFeedback.selectionClick(); setState(() { _tg(i); mv++; }); },
+            onTap: () { Sfx.tap(); setState(() { _tg(i); mv++; }); },
             child: AnimatedContainer(duration: const Duration(milliseconds: 250), alignment: Alignment.center,
                 decoration: BoxDecoration(color: g[i] ? const Color(0xFFFFE066) : const Color(0xFFD9D2E9), borderRadius: BorderRadius.circular(16), border: Border.all(color: ink, width: 3),
                     boxShadow: g[i] ? [BoxShadow(color: const Color(0xFFFFD93D).withOpacity(.8), blurRadius: 14)] : []),
-                child: AnimatedScale(scale: g[i] ? 1 : 0, duration: const Duration(milliseconds: 250), curve: Curves.elasticOut, child: const Text('💡', style: TextStyle(fontSize: 28)))))], gap: 6),
+                child: AnimatedScale(scale: g[i] ? 1 : 0, duration: const Duration(milliseconds: 250), curve: Curves.elasticOut, child: Tx('💡', style: TextStyle(fontSize: 28)))))], gap: 6),
       ]);
 }

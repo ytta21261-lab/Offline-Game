@@ -99,6 +99,7 @@ class _MpS extends State<MpScreen> {
         else if (d['t'] == 'full') { setState(() { info = 'Room penuh'; phase = 'lobby'; }); }
         else if (d['t'] == 's' && (phase == 'waitc' || phase == 'play')) {
           setState(() { s = Map<String, dynamic>.from(d['s']); human = List<bool>.from(d['h']); phase = 'play'; });
+          if (s!['win'] != null && s!['win'] >= 0) { Sfx.win(); }
         }
       }
     }
@@ -109,7 +110,7 @@ class _MpS extends State<MpScreen> {
     final st = s;
     if (st == null || st['win'] != null || st['turn'] != i) return;
     if (!g.act(st, i, m)) return;
-    HapticFeedback.selectionClick(); _bc(); _loop();
+    Sfx.tap(); if (st['win'] != null && st['win'] >= 0) { Sfx.win(); } _bc(); _loop();
   }
   void _loop() {
     final cur = s!; final t = cur['turn'] as int;
@@ -123,25 +124,25 @@ class _MpS extends State<MpScreen> {
 
   Widget _lobby() => page([
         cart(Colors.white, pad: const EdgeInsets.all(16), child: Column(children: [
-          Text(g.maxP > g.minP ? 'Jumlah pemain: $n' : 'Pemain: ${g.minP}', style: ts(20)),
+          Tx(g.maxP > g.minP ? 'Jumlah pemain: $n' : 'Pemain: ${g.minP}', style: ts(20)),
           if (g.maxP > g.minP) Slider(min: g.minP.toDouble(), max: g.maxP.toDouble(), divisions: g.maxP - g.minP, value: cl(n.toDouble(), g.minP.toDouble(), g.maxP.toDouble()), activeColor: pink, onChanged: (v) => setState(() => n = v.round())),
           const SizedBox(height: 8), btn('🤖 Lawan Bot', _bots), const SizedBox(height: 10), btn('🏠 Buat Room Online', _hostOnline, c: const Color(0xFF4DB6E8)),
-          const SizedBox(height: 6), Text('Slot kosong diisi bot', style: ts(12, const Color(0xFF8A7A9B))),
+          const SizedBox(height: 6), Tx('Slot kosong diisi bot', style: ts(12, const Color(0xFF8A7A9B))),
         ])),
         const SizedBox(height: 16),
         cart(Colors.white, pad: const EdgeInsets.all(16), child: Column(children: [
-          Text('Gabung teman', style: ts(20)), const SizedBox(height: 8),
+          Tx('Gabung teman', style: ts(20)), const SizedBox(height: 8),
           SizedBox(width: 160, child: TextField(controller: tc, textAlign: TextAlign.center, maxLength: 5, textCapitalization: TextCapitalization.none, style: ts(22), decoration: const InputDecoration(hintText: 'KODE', counterText: '', border: OutlineInputBorder()))),
           const SizedBox(height: 8), btn('🔗 Gabung', _join, c: const Color(0xFF3DBE6C)),
         ])),
-        if (info.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(info, style: ts(16, Colors.red))),
+        if (info.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Tx(info, style: ts(16, Colors.red))),
       ]);
   Widget _wait() => page([cart(Colors.white, pad: const EdgeInsets.all(20), child: Column(children: [
-        Text('Kode room', style: ts(18)), Text(code.toUpperCase(), style: ts(48)),
-        const SizedBox(height: 6), Text('Pemain online: ${human.where((x) => x).length}/$n', style: ts(18)),
-        Text('Slot kosong diisi bot 🤖', style: ts(13, const Color(0xFF8A7A9B))), const SizedBox(height: 12),
+        Tx('Kode room', style: ts(18)), Tx(code.toUpperCase(), style: ts(48)),
+        const SizedBox(height: 6), Tx('Pemain online: ${human.where((x) => x).length}/$n', style: ts(18)),
+        Tx('Slot kosong diisi bot 🤖', style: ts(13, const Color(0xFF8A7A9B))), const SizedBox(height: 12),
         btn('▶ Mulai', _begin, c: const Color(0xFF3DBE6C)),
-        if (info.isNotEmpty) Text(info, style: ts(14, Colors.red)),
+        if (info.isNotEmpty) Tx(info, style: ts(14, Colors.red)),
       ]))]);
   Widget _play() {
     final st = s!; final w = st['win']; final t = st['turn'] as int;
@@ -158,7 +159,7 @@ class _MpS extends State<MpScreen> {
       case 'lobby': body = _lobby(); break;
       case 'wait': body = _wait(); break;
       case 'play': body = _play(); break;
-      default: body = page([Text(phase == 'joining' ? '⏳ Menyambung…' : '⏳ Menunggu host memulai…', style: ts(22)), if (info.isNotEmpty) Text(info, style: ts(14, Colors.red))]);
+      default: body = page([Tx(phase == 'joining' ? '⏳ Menyambung…' : '⏳ Menunggu host memulai…', style: ts(22)), if (info.isNotEmpty) Tx(info, style: ts(14, Colors.red))]);
     }
     return Scaffold(body: Bg(child: SafeArea(child: Stack(children: [
       Column(children: [header(context, '${widget.icon} ${g.title}'), Expanded(child: body)]),
@@ -262,16 +263,16 @@ class DiceLadder extends MpGame {
           for (int i = 0; i < pos.length; i++) AnimatedPositioned(
               duration: const Duration(milliseconds: 600), curve: Curves.easeInOut,
               left: _cellC(pos[i], cs).dx - cs * .26 + (i % 3 - 1) * cs * .2, top: _cellC(pos[i], cs).dy - cs * .3 + (i ~/ 3 - .5) * cs * .22,
-              child: Text(EM[i], style: TextStyle(fontSize: cs * .5))),
+              child: Tx(EM[i], style: TextStyle(fontSize: cs * .5))),
         ]));
       }))),
       const SizedBox(height: 10),
       AnimatedSwitcher(duration: const Duration(milliseconds: 450),
           transitionBuilder: (w, a) => RotationTransition(turns: Tween<double>(begin: .5, end: 0.0).animate(a), child: ScaleTransition(scale: a, child: w)),
-          child: Text(d == 0 ? '🎲' : '⚀⚁⚂⚃⚄⚅'[d - 1], key: ValueKey(s['cnt']), style: const TextStyle(fontSize: 64))),
+          child: Tx(d == 0 ? '🎲' : '⚀⚁⚂⚃⚄⚅'[d - 1], key: ValueKey(s['cnt']), style: const TextStyle(fontSize: 64))),
       Opacity(opacity: mine ? 1 : .4, child: btn('Lempar Dadu 🎲', () => x.send(0))),
       const SizedBox(height: 6),
-      Text('🟩 Tangga naik · 🟥 Ular turun · Angka 6 = lempar lagi', textAlign: TextAlign.center, style: ts(12, const Color(0xFF8A7A9B))),
+      Tx('🟩 Tangga naik · 🟥 Ular turun · Angka 6 = lempar lagi', textAlign: TextAlign.center, style: ts(12, const Color(0xFF8A7A9B))),
     ]));
   }
 }
@@ -299,7 +300,7 @@ class TicTacToe extends MpGame {
     final b = List<int>.from(s['b']);
     return Padding(padding: const EdgeInsets.all(24), child: AspectRatio(aspectRatio: 1, child: GridView.count(physics: const NeverScrollableScrollPhysics(), crossAxisCount: 3, mainAxisSpacing: 10, crossAxisSpacing: 10, children: [
       for (int i = 0; i < 9; i++) GestureDetector(onTap: () => x.send(i), child: cart(Colors.white, r: 20,
-          child: AnimatedScale(scale: b[i] < 0 ? 0 : 1, duration: const Duration(milliseconds: 400), curve: Curves.elasticOut, child: Text(b[i] == 1 ? '⭕' : '❌', style: const TextStyle(fontSize: 52))))),
+          child: AnimatedScale(scale: b[i] < 0 ? 0 : 1, duration: const Duration(milliseconds: 400), curve: Curves.elasticOut, child: Tx(b[i] == 1 ? '⭕' : '❌', style: const TextStyle(fontSize: 52))))),
     ])));
   }
 }
@@ -335,15 +336,15 @@ class _GuessPadS extends State<_GuessPad> {
   @override Widget build(BuildContext c) {
     final s = widget.s; final lo = s['lo'] as int, hi = s['hi'] as int; final log = List<String>.from(s['log']);
     final val = min(hi, max(lo, v)); final mine = s['turn'] == widget.x.me && s['win'] == null;
-    Widget step(String t, int d) => Pressable(onTap: () => setState(() => v = min(hi, max(lo, val + d))), child: cart(sky, w: 54, h: 48, r: 14, child: Text(t, style: ts(16, Colors.white))));
+    Widget step(String t, int d) => Pressable(onTap: () => setState(() => v = min(hi, max(lo, val + d))), child: cart(sky, w: 54, h: 48, r: 14, child: Tx(t, style: ts(16, Colors.white))));
     return Padding(padding: const EdgeInsets.all(16), child: Column(children: [
-      Text('Angkanya antara $lo – $hi', style: ts(20)), const SizedBox(height: 12),
-      Text('$val', style: ts(64)), const SizedBox(height: 8),
+      Tx('Angkanya antara $lo – $hi', style: ts(20)), const SizedBox(height: 12),
+      Tx('$val', style: ts(64)), const SizedBox(height: 8),
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [step('−10', -10), const SizedBox(width: 8), step('−1', -1), const SizedBox(width: 8), step('+1', 1), const SizedBox(width: 8), step('+10', 10)]),
       const SizedBox(height: 12),
       Opacity(opacity: mine ? 1 : .4, child: btn('🔮 Tebak!', () => widget.x.send(val))),
       const SizedBox(height: 12),
-      for (final l in log.reversed.take(5)) Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Text(l, style: ts(15))),
+      for (final l in log.reversed.take(5)) Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: Tx(l, style: ts(15))),
     ]));
   }
 }

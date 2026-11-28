@@ -35,10 +35,10 @@ class _BalloonS extends State<BalloonGame> {
         W = k.maxWidth; H = k.maxHeight;
         return Stack(children: [
           for (final b in bs) Positioned(left: b.x * W - 28, top: b.y * H, child: GestureDetector(
-              onTapDown: (_) { HapticFeedback.lightImpact(); setState(() { bs.remove(b); sc++; pops.add([b.x, b.y, 8]); }); }, child: _bw(b.c))),
-          for (final p in pops) Positioned(left: p[0] * W - 24, top: p[1] * H, child: Transform.scale(scale: 1.6 - p[2] / 8, child: const Text('💥', style: TextStyle(fontSize: 40)))),
+              onTapDown: (_) { Sfx.good(); setState(() { bs.remove(b); sc++; pops.add([b.x, b.y, 8]); }); }, child: _bw(b.c))),
+          for (final p in pops) Positioned(left: p[0] * W - 24, top: p[1] * H, child: Transform.scale(scale: 1.6 - p[2] / 8, child: Tx('💥', style: TextStyle(fontSize: 40)))),
           Positioned(top: 10, left: 0, right: 0, child: Center(child: status('⭐ $sc    ${'❤️' * max(0, lives)}'))),
-          if (lives <= 0) Center(child: cart(Colors.white, pad: const EdgeInsets.all(20), child: Text('Game over 🎈\nSkor $sc\n(tekan 🔄)', textAlign: TextAlign.center, style: ts(26)))),
+          if (lives <= 0) Center(child: cart(Colors.white, pad: const EdgeInsets.all(20), child: Tx('Game over 🎈\nSkor $sc\n(tekan 🔄)', textAlign: TextAlign.center, style: ts(26)))),
         ]);
       });
 }
@@ -61,8 +61,8 @@ class _StackS extends State<StackGame> {
   void _tap() {
     if (dead) return;
     final l = bl.last; final o = min(x + w, l[0] + l[1]) - max(x, l[0]);
-    if (o <= .01) { HapticFeedback.heavyImpact(); setState(() => dead = true); return; }
-    HapticFeedback.lightImpact();
+    if (o <= .01) { Sfx.bad(); setState(() => dead = true); return; }
+    Sfx.good();
     setState(() { bl.add([max(x, l[0]), o]); w = o; sp = min(.03, sp + .0004); x = 0; dir = 1; });
   }
   @override Widget build(BuildContext c) => GestureDetector(
@@ -113,7 +113,7 @@ class _FlappyS extends State<FlappyGame> {
       if (p.isEmpty || p.last[0] < W - 210) p.add([W, 90 + rnd.nextDouble() * max(10.0, H - 330), 0]);
       p.removeWhere((q) => q[0] < -70);
       for (final q in p) {
-        if (q[2] == 0 && q[0] + 60 < 80) { q[2] = 1; sc++; HapticFeedback.selectionClick(); }
+        if (q[2] == 0 && q[0] + 60 < 80) { q[2] = 1; sc++; Sfx.tap(); }
         if (q[0] < 114 && q[0] + 60 > 80 && (by < q[1] || by + 34 > q[1] + 160)) dead = true;
       }
       if (by < 0 || by + 34 > H - 30) dead = true;
@@ -125,14 +125,14 @@ class _FlappyS extends State<FlappyGame> {
         return GestureDetector(
             behavior: HitTestBehavior.opaque, onTapDown: (_) => _tap(),
             child: ClipRect(child: Container(color: const Color(0xFFBFEBFF), child: Stack(children: [
-              Positioned(top: 60, left: 40, child: Opacity(opacity: .7, child: Text('☁️', style: ts(60)))),
-              Positioned(top: 140, right: 30, child: Opacity(opacity: .7, child: Text('☁️', style: ts(44)))),
+              Positioned(top: 60, left: 40, child: Opacity(opacity: .7, child: Tx('☁️', style: ts(60)))),
+              Positioned(top: 140, right: 30, child: Opacity(opacity: .7, child: Tx('☁️', style: ts(44)))),
               for (final q in p) ...[
                 Positioned(left: q[0], top: -10, width: 60, height: q[1] + 10, child: cart(const Color(0xFF6BCB77), r: 10)),
                 Positioned(left: q[0], top: q[1] + 160, width: 60, height: max(0.0, H - q[1] - 190), child: cart(const Color(0xFF6BCB77), r: 10)),
               ],
               Positioned(bottom: 0, left: 0, right: 0, height: 30, child: Container(decoration: const BoxDecoration(color: Color(0xFFE0B36B), border: Border(top: BorderSide(color: ink, width: 3))))),
-              Positioned(left: 80, top: by, child: Transform.rotate(angle: cl(vy / 12, -.5, .8), child: const Text('🐥', style: TextStyle(fontSize: 34)))),
+              Positioned(left: 80, top: by, child: Transform.rotate(angle: cl(vy / 12, -.5, .8), child: Tx('🐥', style: TextStyle(fontSize: 34)))),
               Positioned(top: 12, left: 0, right: 0, child: Center(child: status(dead ? 'Game over! Skor $sc (tekan 🔄)' : go ? 'Skor $sc' : 'Ketuk untuk terbang!'))),
             ]))));
       });
@@ -157,7 +157,7 @@ class _SlideS extends State<SlideGame> {
   bool get won { for (int i = 0; i < 8; i++) { if (t[i] != i + 1) return false; } return true; }
   void _tap(int i) {
     final e = t.indexOf(0);
-    if (!won && _nb(e).contains(i)) { HapticFeedback.selectionClick(); setState(() { t[e] = t[i]; t[i] = 0; moves++; }); }
+    if (!won && _nb(e).contains(i)) { Sfx.tap(); setState(() { t[e] = t[i]; t[i] = 0; moves++; }); }
   }
   @override Widget build(BuildContext c) => page([
         status(won ? '🎉 Selesai dalam $moves langkah!' : 'Langkah: $moves'), const SizedBox(height: 12),
@@ -168,7 +168,7 @@ class _SlideS extends State<SlideGame> {
                 key: ValueKey(v), duration: const Duration(milliseconds: 220), curve: Curves.easeOut,
                 left: (t.indexOf(v) % 3) * cs, top: (t.indexOf(v) ~/ 3) * cs, width: cs, height: cs,
                 child: Padding(padding: const EdgeInsets.all(4), child: GestureDetector(onTap: () => _tap(t.indexOf(v)),
-                    child: cart(HSLColor.fromAHSL(1, v * 40.0, .75, .75).toColor(), child: Text('$v', style: ts(38)))))),
+                    child: cart(HSLColor.fromAHSL(1, v * 40.0, .75, .75).toColor(), child: Tx('$v', style: ts(38)))))),
           ]);
         }))),
       ]);
@@ -196,7 +196,7 @@ class _MineS extends State<MineGame> {
       first = false; int k = 0; final safe = [i, ..._nbs(i)];
       while (k < 10) { final j = rnd.nextInt(64); if (!mine[j] && !safe.contains(j)) { mine[j] = true; k++; } }
     }
-    if (mine[i]) { HapticFeedback.heavyImpact(); setState(() { dead = true; for (int j = 0; j < 64; j++) { if (mine[j]) open[j] = true; } }); return; }
+    if (mine[i]) { Sfx.bad(); setState(() { dead = true; for (int j = 0; j < 64; j++) { if (mine[j]) open[j] = true; } }); return; }
     setState(() {
       final q = [i];
       while (q.isNotEmpty) { final x = q.removeLast(); if (open[x] || flag[x]) continue; open[x] = true; if (_n(x) == 0) q.addAll(_nbs(x)); }
@@ -207,15 +207,15 @@ class _MineS extends State<MineGame> {
     return page([
       status(dead ? '💥 Kena ranjau! (tekan 🔄)' : won ? '🎉 Semua ranjau terhindar!' : '10 ranjau tersembunyi'), const SizedBox(height: 10),
       Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Pressable(onTap: () => setState(() => fm = false), child: cart(fm ? Colors.white : sun, pad: const EdgeInsets.all(10), child: Text('⛏️ Gali', style: ts(16)))),
+        Pressable(onTap: () => setState(() => fm = false), child: cart(fm ? Colors.white : sun, pad: const EdgeInsets.all(10), child: Tx('⛏️ Gali', style: ts(16)))),
         const SizedBox(width: 12),
-        Pressable(onTap: () => setState(() => fm = true), child: cart(fm ? sun : Colors.white, pad: const EdgeInsets.all(10), child: Text('🚩 Bendera', style: ts(16)))),
+        Pressable(onTap: () => setState(() => fm = true), child: cart(fm ? sun : Colors.white, pad: const EdgeInsets.all(10), child: Tx('🚩 Bendera', style: ts(16)))),
       ]),
       const SizedBox(height: 12),
       board(8, [for (int i = 0; i < 64; i++) GestureDetector(onTap: () => _tap(i), onLongPress: () { if (!open[i] && !dead) setState(() => flag[i] = !flag[i]); },
           child: AnimatedContainer(duration: const Duration(milliseconds: 200), alignment: Alignment.center,
               decoration: BoxDecoration(color: open[i] ? (mine[i] ? const Color(0xFFFF9B9B) : const Color(0xFFFFF3D6)) : sky, borderRadius: BorderRadius.circular(8), border: Border.all(color: ink, width: 2)),
-              child: Text(open[i] ? (mine[i] ? '💣' : (_n(i) > 0 ? '${_n(i)}' : '')) : (flag[i] ? '🚩' : ''), style: ts(17, open[i] && !mine[i] ? nc[_n(i)] : ink))))], gap: 3),
+              child: Tx(open[i] ? (mine[i] ? '💣' : (_n(i) > 0 ? '${_n(i)}' : '')) : (flag[i] ? '🚩' : ''), style: ts(17, open[i] && !mine[i] ? nc[_n(i)] : ink))))], gap: 3),
     ]);
   }
 }
@@ -233,16 +233,16 @@ class _ColorS extends State<ColorGame> {
   @override void dispose() { tm?.cancel(); super.dispose(); }
   void _nx() { w = rnd.nextInt(4); c = rnd.nextInt(4); n++; }
   @override Widget build(BuildContext ctx) {
-    if (t <= 0) return page([Text('Selesai! 🌈', style: ts(34)), const SizedBox(height: 8), Text('Skor $s', style: ts(28))]);
+    if (t <= 0) return page([Tx('Selesai! 🌈', style: ts(34)), const SizedBox(height: 8), Tx('Skor $s', style: ts(28))]);
     return page([
       status('⏱ $t    ⭐ $s'), const SizedBox(height: 16),
-      Text('Apa WARNA tulisannya?', style: ts(16)), const SizedBox(height: 8),
+      Tx('Apa WARNA tulisannya?', style: ts(16)), const SizedBox(height: 8),
       AnimatedSwitcher(duration: const Duration(milliseconds: 200), transitionBuilder: (a, an) => ScaleTransition(scale: an, child: a),
-          child: Text(names[w], key: ValueKey(n), style: ts(56, cols[c]))),
+          child: Tx(names[w], key: ValueKey(n), style: ts(56, cols[c]))),
       const SizedBox(height: 20),
       board(2, [for (int i = 0; i < 4; i++) Pressable(
-          onTap: () { setState(() { if (i == c) { s++; HapticFeedback.lightImpact(); } else if (s > 0) { s--; } _nx(); }); },
-          child: cart(Colors.white, child: Text(names[i], style: ts(22))))], gap: 12),
+          onTap: () { setState(() { if (i == c) { s++; Sfx.good(); } else if (s > 0) { s--; } _nx(); }); },
+          child: cart(Colors.white, child: Tx(names[i], style: ts(22))))], gap: 12),
     ]);
   }
 }
@@ -260,8 +260,8 @@ class _TilesS extends State<TilesGame> {
   void _tap(int col) {
     if (over) return;
     if (!started) { started = true; tm = Timer.periodic(const Duration(seconds: 1), (_) { setState(() { t--; if (t <= 0) { over = true; tm?.cancel(); } }); }); }
-    if (rows.first[1] == col) { HapticFeedback.selectionClick(); setState(() { rows.removeAt(0); _add(); s++; }); }
-    else { HapticFeedback.heavyImpact(); setState(() { over = true; tm?.cancel(); }); }
+    if (rows.first[1] == col) { Sfx.tap(); setState(() { rows.removeAt(0); _add(); s++; }); }
+    else { Sfx.bad(); setState(() { over = true; tm?.cancel(); }); }
   }
   @override Widget build(BuildContext c) => Column(children: [
         const SizedBox(height: 8),
@@ -293,7 +293,7 @@ class _OrderS extends State<OrderGame> {
     if (next > 16) return;
     if (v == next) {
       if (next == 1) { sw.start(); tm = Timer.periodic(const Duration(milliseconds: 100), (_) => setState(() {})); }
-      HapticFeedback.selectionClick();
+      Sfx.tap();
       setState(() => next++);
       if (next > 16) { sw.stop(); tm?.cancel(); }
     } else {
@@ -306,7 +306,7 @@ class _OrderS extends State<OrderGame> {
     return page([
       status(next > 16 ? '🎉 Selesai dalam $tt detik!' : '⏱ $tt s    Cari angka: $next'), const SizedBox(height: 12),
       board(4, [for (final v in n) AnimatedScale(scale: v < next ? 0 : 1, duration: const Duration(milliseconds: 250), curve: Curves.easeIn,
-          child: Pressable(onTap: () => _tap(v), child: cart(bad == v ? const Color(0xFFFF9B9B) : HSLColor.fromAHSL(1, v * 22.0, .7, .8).toColor(), child: Text('$v', style: ts(26)))))]),
+          child: Pressable(onTap: () => _tap(v), child: cart(bad == v ? const Color(0xFFFF9B9B) : HSLColor.fromAHSL(1, v * 22.0, .7, .8).toColor(), child: Tx('$v', style: ts(26)))))]),
     ]);
   }
 }
@@ -328,7 +328,7 @@ class _PongS extends State<PongGame> {
       if (!init) { init = true; px = ox = W / 2; _reset(1); }
       bx += vx; by += vy;
       if (bx < 10 || bx > W - 10) { vx = -vx; bx = cl(bx, 10, W - 10); }
-      if (vy > 0 && by > H - 52 && by < H - 34 && (bx - px).abs() < pw / 2 + 10) { vy = cl(-vy * 1.06, -9, 9); vx = cl(vx + (bx - px) * .06, -7, 7); by = H - 52; HapticFeedback.selectionClick(); }
+      if (vy > 0 && by > H - 52 && by < H - 34 && (bx - px).abs() < pw / 2 + 10) { vy = cl(-vy * 1.06, -9, 9); vx = cl(vx + (bx - px) * .06, -7, 7); by = H - 52; Sfx.tap(); }
       if (vy < 0 && by < 52 && by > 34 && (bx - ox).abs() < pw / 2 + 10) { vy = cl(-vy * 1.06, -9, 9); vx = cl(vx + (bx - ox) * .06, -7, 7); by = 52; }
       ox += cl(bx - ox, -3.4, 3.4) * (vy < 0 ? 1 : .35);
       if (by > H) { os++; _reset(-1); }
@@ -341,9 +341,9 @@ class _PongS extends State<PongGame> {
             onPanUpdate: (d) => px = cl(d.localPosition.dx, pw / 2, W - pw / 2),
             child: ClipRRect(borderRadius: BorderRadius.circular(20), child: Stack(children: [
               CustomPaint(size: Size.infinite, painter: _PongP(px, ox, bx, by, init)),
-              Positioned(left: 14, top: H / 2 - 40, child: Text('$os', style: ts(40, ink.withOpacity(.4)))),
-              Positioned(left: 14, top: H / 2 + 4, child: Text('$ps', style: ts(40, ink.withOpacity(.4)))),
-              if (ps >= 5 || os >= 5) Center(child: cart(Colors.white, pad: const EdgeInsets.all(18), child: Text(ps >= 5 ? '🏆 Kamu menang!\n(tekan 🔄)' : '🤖 Bot menang!\n(tekan 🔄)', textAlign: TextAlign.center, style: ts(24)))),
+              Positioned(left: 14, top: H / 2 - 40, child: Tx('$os', style: ts(40, ink.withOpacity(.4)))),
+              Positioned(left: 14, top: H / 2 + 4, child: Tx('$ps', style: ts(40, ink.withOpacity(.4)))),
+              if (ps >= 5 || os >= 5) Center(child: cart(Colors.white, pad: const EdgeInsets.all(18), child: Tx(ps >= 5 ? '🏆 Kamu menang!\n(tekan 🔄)' : '🤖 Bot menang!\n(tekan 🔄)', textAlign: TextAlign.center, style: ts(24)))),
             ])));
       }));
 }

@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'settings.dart';
+export 'settings.dart';
 
 const ink = Color(0xFF4A3B5C), pink = Color(0xFFFF8FAB), sky = Color(0xFF7BDFF2), mint = Color(0xFF8EE08A), sun = Color(0xFFFFD166);
 const EM = ['🔴', '🔵', '🟢', '🟡', '🟣', '🟠'];
@@ -23,13 +25,13 @@ class _PressS extends State<Pressable> {
   @override Widget build(BuildContext c) => GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: (_) => setState(() => d = true),
-      onTapUp: (_) { setState(() => d = false); widget.onTap?.call(); },
+      onTapUp: (_) { setState(() => d = false); Sfx.p('tap'); widget.onTap?.call(); },
       onTapCancel: () => setState(() => d = false),
       child: AnimatedScale(scale: d ? .92 : 1, duration: const Duration(milliseconds: 90), child: widget.child));
 }
 
-Widget btn(String t, VoidCallback f, {Color c = pink}) => Pressable(onTap: f, child: IntrinsicWidth(child: cart(c, pad: const EdgeInsets.symmetric(horizontal: 22, vertical: 12), child: Text(t, style: ts(18, Colors.white)))));
-Widget status(String s) => AnimatedSwitcher(duration: const Duration(milliseconds: 200), transitionBuilder: (w, a) => ScaleTransition(scale: a, child: w), child: Text(s, key: ValueKey(s), textAlign: TextAlign.center, style: ts(20)));
+Widget btn(String t, VoidCallback f, {Color c = pink}) => Pressable(onTap: f, child: IntrinsicWidth(child: cart(c, pad: const EdgeInsets.symmetric(horizontal: 22, vertical: 12), child: Tx(t, style: ts(18, Colors.white)))));
+Widget status(String s) => AnimatedSwitcher(duration: const Duration(milliseconds: 200), transitionBuilder: (w, a) => ScaleTransition(scale: a, child: w), child: Tx(s, key: ValueKey(s), textAlign: TextAlign.center, style: ts(20)));
 Widget board(int cols, List<Widget> k, {double gap = 8}) => GridView.count(shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisCount: cols, mainAxisSpacing: gap, crossAxisSpacing: gap, children: k);
 Widget page(List<Widget> k, {bool scroll = true, double pad = 16}) {
   final col = Column(mainAxisSize: MainAxisSize.min, children: k);
@@ -41,7 +43,7 @@ Widget header(BuildContext c, String t, [Widget? tr]) => Padding(
     child: Row(children: [
       Pressable(onTap: () => Navigator.pop(c), child: cart(pink, w: 48, h: 48, child: const Icon(Icons.arrow_back_rounded, color: Colors.white))),
       const SizedBox(width: 12),
-      Expanded(child: Text(t, style: ts(22))),
+      Expanded(child: Tx(t, style: ts(22))),
       if (tr != null) tr,
     ]));
 
@@ -86,3 +88,5 @@ class _GSS extends State<GameScaffold> {
         Expanded(child: KeyedSubtree(key: ValueKey(k), child: widget.build())),
       ]))));
 }
+
+Widget Tx(String s, {Key? key, TextStyle? style, TextAlign? textAlign}) => Text(L(s), key: key, style: style, textAlign: textAlign);
