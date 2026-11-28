@@ -1,12 +1,16 @@
 name: pesta_mini
-description: Pesta Mini - koleksi game seru offline dan multiplayer P2P
+description: Pesta Mini - 40 game seru offline, bot, online P2P dan lokal
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 environment:
   sdk: '>=3.3.0 <4.0.0'
 dependencies:
   flutter:
     sdk: flutter
   webview_flutter: ^4.10.0
+  audioplayers: ^6.1.0
+  shared_preferences: ^2.3.2
 flutter:
   uses-material-design: true
+  assets:
+    - assets/sfx/
